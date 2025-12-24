@@ -72,3 +72,114 @@ button.secondary {
     background: white;
     margin: 100px auto;
     padding: 30px;
+    width: 80%;
+    text-align: center;
+    border: 3px solid #e30613;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN (FORMULARIO) -->
+<div id="loginScreen" class="screen">
+    <h1>Identificación Operario</h1>
+
+    <form onsubmit="return doLogin();">
+        <input type="text" id="userName" placeholder="Introduce tu nombre">
+        <button type="submit">ENTRAR</button>
+    </form>
+</div>
+
+<!-- APP -->
+<div id="appScreen" class="screen" style="display:none;">
+    <h1 id="welcome"></h1>
+
+    <input type="text" id="qr1" placeholder="Lectura QR 1">
+    <input type="text" id="qr2" placeholder="Lectura QR 2">
+
+    <div class="info" id="info">Esperando lecturas…</div>
+
+    <button class="secondary" onclick="location.reload()">DESLOGUEAR</button>
+</div>
+
+<!-- MODAL ERROR -->
+<div id="errorModal" class="modal">
+    <div class="modal-content">
+        <h2>❌ REVISA EL MATERIAL</h2>
+        <button onclick="closeModal()">ACEPTAR</button>
+    </div>
+</div>
+
+<!-- SONIDOS -->
+<audio id="okSound">
+<source src="data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVwAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" type="audio/wav">
+</audio>
+
+<audio id="errorSound">
+<source src="data:audio/wav;base64,UklGRqAAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YYwAAAAA/////////////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==" type="audio/wav">
+</audio>
+
+<script>
+function doLogin() {
+    var name = document.getElementById("userName").value;
+    if (name === "") return false;
+
+    document.getElementById("welcome").innerHTML = "Operario: " + name;
+
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("appScreen").style.display = "block";
+
+    setTimeout(function () {
+        document.getElementById("qr1").focus();
+    }, 300);
+
+    return false; // MUY IMPORTANTE
+}
+
+function checkQR() {
+    var qr1 = document.getElementById("qr1").value;
+    var qr2 = document.getElementById("qr2").value;
+    if (qr1 === "" || qr2 === "") return;
+
+    var v1 = qr1.substring(0,6);
+    var v2 = qr2.substring(0,6);
+
+    if (v1 === v2) {
+        document.body.style.backgroundColor = "#2ecc71";
+        document.getElementById("info").innerHTML = "✔ CÓDIGOS COINCIDEN";
+        document.getElementById("okSound").play();
+        if (navigator.vibrate) navigator.vibrate(200);
+        setTimeout(clearAll, 3000);
+    } else {
+        document.body.style.backgroundColor = "#e74c3c";
+        document.getElementById("info").innerHTML = "✖ CÓDIGOS NO COINCIDEN";
+        document.getElementById("errorSound").play();
+        document.getElementById("errorModal").style.display = "block";
+    }
+}
+
+document.getElementById("qr1").onkeyup = function () {
+    if (this.value.length > 0) document.getElementById("qr2").focus();
+};
+
+document.getElementById("qr2").onkeyup = function () {
+    checkQR();
+};
+
+function closeModal() {
+    document.getElementById("errorModal").style.display = "none";
+    clearAll();
+}
+
+function clearAll() {
+    document.getElementById("qr1").value = "";
+    document.getElementById("qr2").value = "";
+    document.getElementById("info").innerHTML = "Esperando lecturas…";
+    document.body.style.backgroundColor = "#e30613";
+    document.getElementById("qr1").focus();
+}
+</script>
+
+</body>
+</html>
