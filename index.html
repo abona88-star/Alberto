@@ -11,15 +11,25 @@ html, body {
     padding: 0;
     height: 100%;
     font-family: Arial;
-    background-color: #ffffff;
 }
 
 .screen {
     width: 100%;
     height: 100%;
-    background-color: #ffffff;
     padding: 20px;
     box-sizing: border-box;
+}
+
+.screen.white {
+    background-color: #ffffff;
+}
+
+.screen.ok {
+    background-color: #2ecc71;
+}
+
+.screen.nok {
+    background-color: #e74c3c;
 }
 
 h1 {
@@ -51,9 +61,9 @@ button.secondary {
 
 .info {
     text-align: center;
-    font-size: 22px;
+    font-size: 26px;
     font-weight: bold;
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
 /* MODAL */
@@ -67,7 +77,7 @@ button.secondary {
 
 .modal-content {
     background: white;
-    margin: 100px auto;
+    margin: 120px auto;
     padding: 30px;
     width: 80%;
     text-align: center;
@@ -79,9 +89,8 @@ button.secondary {
 <body>
 
 <!-- LOGIN -->
-<div id="loginScreen" class="screen">
+<div id="loginScreen" class="screen white">
     <h1>Identificación Operario</h1>
-
     <form onsubmit="return doLogin();">
         <input type="text" id="userName" placeholder="Introduce tu nombre">
         <button type="submit">ENTRAR</button>
@@ -89,7 +98,7 @@ button.secondary {
 </div>
 
 <!-- APP -->
-<div id="appScreen" class="screen" style="display:none;">
+<div id="appScreen" class="screen white" style="display:none;">
     <h1 id="welcome"></h1>
 
     <input type="text" id="qr1" placeholder="Lectura QR 1">
@@ -100,7 +109,7 @@ button.secondary {
     <button class="secondary" onclick="location.reload()">DESLOGUEAR</button>
 </div>
 
-<!-- MODAL ERROR -->
+<!-- MODAL -->
 <div id="errorModal" class="modal">
     <div class="modal-content">
         <h2>❌ REVISA EL MATERIAL</h2>
@@ -118,50 +127,60 @@ button.secondary {
 </audio>
 
 <script>
+var qr2Timer = null;
+var clearTimer = null;
+
 function doLogin() {
     var name = document.getElementById("userName").value;
     if (name === "") return false;
 
     document.getElementById("welcome").innerHTML = "Operario: " + name;
-
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("appScreen").style.display = "block";
 
     setTimeout(function () {
         document.getElementById("qr1").focus();
-    }, 3000);
+    }, 300);
 
     return false;
 }
 
+/* QR1 → QR2 */
 document.getElementById("qr1").onkeyup = function () {
     if (this.value.length >= 6) {
         document.getElementById("qr2").focus();
     }
 };
 
+/* DETECCIÓN FIN DE PISTOLEO QR2 */
 document.getElementById("qr2").onkeyup = function () {
-    checkQR();
+    if (qr2Timer) clearTimeout(qr2Timer);
+
+    qr2Timer = setTimeout(function () {
+        checkQR();
+    }, 300); // ⏱️ fin de pistoleo
 };
 
 function checkQR() {
     var qr1 = document.getElementById("qr1").value;
     var qr2 = document.getElementById("qr2").value;
 
-    // ⛔ NO comprobar hasta tener mínimo 6 caracteres en ambos
     if (qr1.length < 6 || qr2.length < 6) return;
 
     var v1 = qr1.substring(0,6);
     var v2 = qr2.substring(0,6);
 
+    var screen = document.getElementById("appScreen");
+
     if (v1 === v2) {
-        document.body.style.backgroundColor = "#2ecc71";
+        screen.className = "screen ok";
         document.getElementById("info").innerHTML = "✔ CÓDIGOS COINCIDEN";
         document.getElementById("okSound").play();
         if (navigator.vibrate) navigator.vibrate(200);
-        setTimeout(clearAll, 3000);
+
+        clearTimer = setTimeout(clearAll, 10000); // ⏱️ 10 segundos
     } else {
-        document.body.style.backgroundColor = "#e74c3c";
+        screen.className = "screen nok";
         document.getElementById("info").innerHTML = "✖ CÓDIGOS NO COINCIDEN";
         document.getElementById("errorSound").play();
         document.getElementById("errorModal").style.display = "block";
@@ -174,14 +193,18 @@ function closeModal() {
 }
 
 function clearAll() {
+    if (clearTimer) clearTimeout(clearTimer);
+
+    var screen = document.getElementById("appScreen");
+    screen.className = "screen white";
+
     document.getElementById("qr1").value = "";
     document.getElementById("qr2").value = "";
     document.getElementById("info").innerHTML = "Esperando lecturas…";
-    document.body.style.backgroundColor = "#ffffff";
+
     document.getElementById("qr1").focus();
 }
 </script>
 
 </body>
 </html>
-
