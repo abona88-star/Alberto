@@ -34,15 +34,6 @@ body {
     display: block;
 }
 
-.logo {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.logo img {
-    max-width: 220px;
-}
-
 h1 {
     text-align: center;
     color: #e30613;
@@ -105,20 +96,13 @@ button.secondary {
 
 <!-- LOGIN -->
 <div class="screen active" id="loginScreen">
-    <div class="logo">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANAAAABECAYAAAB7bKXzAAAA..." alt="Saphir">
-    </div>
     <h1>Identificación Operario</h1>
     <input type="text" id="userName" placeholder="Introduce tu nombre">
-    <button onclick="login()">ENTRAR</button>
+    <button type="button" id="loginBtn">ENTRAR</button>
 </div>
 
 <!-- APP -->
 <div class="screen" id="appScreen">
-    <div class="logo">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANAAAABECAYAAAB7bKXzAAAA..." alt="Saphir">
-    </div>
-
     <h1 id="welcome"></h1>
 
     <input type="text" id="qr1" placeholder="Lectura QR 1">
@@ -126,18 +110,74 @@ button.secondary {
 
     <div class="info" id="info">Esperando lecturas…</div>
 
-    <button class="secondary" onclick="logout()">DESLOGUEAR</button>
+    <button class="secondary" type="button" id="logoutBtn">DESLOGUEAR</button>
 </div>
 
 <!-- MODAL ERROR -->
 <div class="modal" id="errorModal">
     <div class="modal-content">
         <h2>❌ REVISA EL MATERIAL</h2>
-        <button onclick="closeModal()">ACEPTAR</button>
+        <button type="button" id="closeModalBtn">ACEPTAR</button>
     </div>
 </div>
 
 <!-- AUDIO INDUSTRIAL -->
 <audio id="okSound">
-<source src="data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVwAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+<source src="data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVwAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" type="audio/wav">
+</audio>
+
+<audio id="errorSound">
+<source src="data:audio/wav;base64,UklGRqAAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YYwAAAAA/////////////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==" type="audio/wav">
+</audio>
+
+<script>
+const loginScreen = document.getElementById("loginScreen");
+const appScreen = document.getElementById("appScreen");
+
+const userNameInput = document.getElementById("userName");
+const loginBtn = document.getElementById("loginBtn");
+
+const qr1 = document.getElementById("qr1");
+const qr2 = document.getElementById("qr2");
+const info = document.getElementById("info");
+
+const logoutBtn = document.getElementById("logoutBtn");
+const errorModal = document.getElementById("errorModal");
+const closeModalBtn = document.getElementById("closeModalBtn");
+
+let usuario = "";
+
+/* LOGIN */
+function doLogin() {
+    const name = userNameInput.value.trim();
+    if (!name) return;
+
+    usuario = name;
+    document.getElementById("welcome").textContent = "Operario: " + usuario;
+
+    loginScreen.classList.remove("active");
+    appScreen.classList.add("active");
+
+    setTimeout(() => qr1.focus(), 100);
+}
+
+loginBtn.addEventListener("click", doLogin);
+userNameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doLogin();
+});
+
+/* LOGOUT */
+logoutBtn.addEventListener("click", () => location.reload());
+
+/* FLUJO QR */
+qr1.addEventListener("input", () => {
+    if (qr1.value.length > 0) qr2.focus();
+});
+
+qr2.addEventListener("input", comprobar);
+
+function comprobar() {
+    if (!qr1.value || !qr2.value) return;
+
+    const v1 = qr1.value.substring(0, 6)
 
