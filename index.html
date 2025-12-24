@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Verificación QR - Saphir</title>
+<title>Verificación QR</title>
 
 <style>
 html, body {
@@ -15,23 +15,14 @@ html, body {
 
 body {
     background-color: #e30613;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.2s;
 }
 
 .screen {
-    display: none;
     width: 100%;
     height: 100%;
     background-color: #ffffff;
     padding: 20px;
     box-sizing: border-box;
-}
-
-.screen.active {
-    display: block;
 }
 
 h1 {
@@ -45,7 +36,6 @@ input {
     font-size: 22px;
     padding: 15px;
     margin-bottom: 20px;
-    box-sizing: border-box;
     border: 2px solid #e30613;
 }
 
@@ -56,11 +46,10 @@ button {
     background-color: #e30613;
     color: white;
     border: none;
-    cursor: pointer;
 }
 
 button.secondary {
-    background-color: #000000;
+    background-color: black;
     margin-top: 30px;
 }
 
@@ -68,24 +57,22 @@ button.secondary {
     text-align: center;
     font-size: 22px;
     font-weight: bold;
-    margin-top: 20px;
 }
 
-/* MODAL ERROR */
+/* MODAL */
 .modal {
     display: none;
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0,0,0,0.7);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
 }
 
 .modal-content {
     background: white;
     padding: 40px;
+    margin: 100px auto;
+    width: 80%;
     text-align: center;
     border: 3px solid #e30613;
 }
@@ -95,14 +82,14 @@ button.secondary {
 <body>
 
 <!-- LOGIN -->
-<div class="screen active" id="loginScreen">
+<div id="loginScreen" class="screen">
     <h1>Identificación Operario</h1>
     <input type="text" id="userName" placeholder="Introduce tu nombre">
     <button type="button" id="loginBtn">ENTRAR</button>
 </div>
 
 <!-- APP -->
-<div class="screen" id="appScreen">
+<div id="appScreen" class="screen" style="display:none;">
     <h1 id="welcome"></h1>
 
     <input type="text" id="qr1" placeholder="Lectura QR 1">
@@ -121,9 +108,9 @@ button.secondary {
     </div>
 </div>
 
-<!-- AUDIO INDUSTRIAL -->
+<!-- SONIDOS -->
 <audio id="okSound">
-<source src="data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVwAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" type="audio/wav">
+<source src="data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVwAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" type="audio/wav">
 </audio>
 
 <audio id="errorSound">
@@ -145,39 +132,43 @@ const logoutBtn = document.getElementById("logoutBtn");
 const errorModal = document.getElementById("errorModal");
 const closeModalBtn = document.getElementById("closeModalBtn");
 
-let usuario = "";
-
 /* LOGIN */
-function doLogin() {
-    const name = userNameInput.value.trim();
-    if (!name) return;
+loginBtn.onclick = function () {
+    var name = userNameInput.value.trim();
+    if (name === "") return;
 
-    usuario = name;
-    document.getElementById("welcome").textContent = "Operario: " + usuario;
+    document.getElementById("welcome").innerText = "Operario: " + name;
 
-    loginScreen.classList.remove("active");
-    appScreen.classList.add("active");
+    loginScreen.style.display = "none";
+    appScreen.style.display = "block";
 
-    setTimeout(() => qr1.focus(), 100);
-}
+    setTimeout(function () {
+        qr1.focus();
+    }, 200);
+};
 
-loginBtn.addEventListener("click", doLogin);
-userNameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") doLogin();
-});
+userNameInput.onkeydown = function (e) {
+    if (e.keyCode === 13) loginBtn.onclick();
+};
 
 /* LOGOUT */
-logoutBtn.addEventListener("click", () => location.reload());
+logoutBtn.onclick = function () {
+    location.reload();
+};
 
 /* FLUJO QR */
-qr1.addEventListener("input", () => {
+qr1.oninput = function () {
     if (qr1.value.length > 0) qr2.focus();
-});
+};
 
-qr2.addEventListener("input", comprobar);
-
-function comprobar() {
+qr2.oninput = function () {
     if (!qr1.value || !qr2.value) return;
 
-    const v1 = qr1.value.substring(0, 6)
+    var v1 = qr1.value.substring(0,6);
+    var v2 = qr2.value.substring(0,6);
 
+    if (v1 === v2) {
+        document.body.style.backgroundColor = "#2ecc71";
+        info.innerText = "✔ CÓDIGOS COINCIDEN";
+        document.getElementById("okSound").play();
+        if (navigator.vibrate)
