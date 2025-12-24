@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Verificación QR</title>
+
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background-color: #f0f0f0;
+        transition: background-color 0.2s;
+    }
+
+    .container {
+        padding: 20px;
+    }
+
+    input {
+        width: 100%;
+        font-size: 22px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+    }
+
+    .info {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+    <input type="text" id="qr1" placeholder="Lectura QR 1" autofocus>
+    <input type="text" id="qr2" placeholder="Lectura QR 2">
+    <div class="info" id="info">Esperando lecturas…</div>
+</div>
+
+<script>
+const qr1 = document.getElementById('qr1');
+const qr2 = document.getElementById('qr2');
+const info = document.getElementById('info');
+
+function comprobar() {
+    if (qr1.value === "" || qr2.value === "") {
+        document.body.style.backgroundColor = "#f0f0f0";
+        info.textContent = "Esperando lecturas…";
+        return;
+    }
+
+    if (qr1.value === qr2.value) {
+        document.body.style.backgroundColor = "#2ecc71"; // verde
+        info.textContent = "✔ CÓDIGOS COINCIDEN";
+    } else {
+        document.body.style.backgroundColor = "#e74c3c"; // rojo
+        info.textContent = "✖ CÓDIGOS NO COINCIDEN";
+    }
+}
+
+qr1.addEventListener("input", comprobar);
+qr2.addEventListener("input", comprobar);
+
+// Opcional: limpiar tras lectura
+qr2.addEventListener("change", () => {
+    setTimeout(() => {
+        qr1.value = "";
+        qr2.value = "";
+        qr1.focus();
+        comprobar();
+    }, 1000);
+});
+</script>
+</body>
+</html>
